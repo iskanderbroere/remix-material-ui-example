@@ -1,6 +1,9 @@
-# Welcome to Remix!
+# Welcome to Remix x MUI!
 
 - [Remix Docs](https://remix.run/docs)
+- [MUI (Material UI) Docs](https://mui.com/getting-started/usage/)
+
+An example Remix and MUI project demonstrating how to integrate Material UI components and theming with Remix. Server rendering of Material UI components and styles works out of the box.
 
 ## Development
 

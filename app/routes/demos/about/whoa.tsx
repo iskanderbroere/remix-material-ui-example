@@ -1,4 +1,5 @@
-import { Link } from "remix";
+import { Link } from "@mui/material";
+import { Link as RemixLink } from "remix";
 
 export default function AboutIndex() {
   return (
@@ -10,7 +11,7 @@ export default function AboutIndex() {
       </p>
       <p>
         <strong>
-          <Link to="..">
+          <Link component={RemixLink} to="..">
             Go back to the <code>/about</code> index.
           </Link>
         </strong>

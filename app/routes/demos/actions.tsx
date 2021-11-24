@@ -1,3 +1,13 @@
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Link,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useEffect, useRef } from "react";
 import type { ActionFunction } from "remix";
 import { Form, json, useActionData, redirect } from "remix";
@@ -47,55 +57,76 @@ export default function ActionsDemo() {
   }, [actionMessage]);
 
   return (
-    <div className="remix__page">
-      <main>
-        <h2>Actions!</h2>
-        <p>
+    <Box
+      sx={{
+        display: "grid",
+        gridAutoRows: ["min-content", "unset"],
+        gridTemplateColumns: [null, "repeat(2, 1fr)"],
+        gap: [2, 4, 8],
+        paddingY: 4,
+      }}
+    >
+      <Box
+        component="main"
+        sx={{
+          py: 1,
+          px: 2,
+        }}
+      >
+        <Typography variant="h5" component="h2" gutterBottom>
+          Actions!
+        </Typography>
+        <Typography paragraph>
           This form submission will send a post request that we handle in our
           `action` export. Any route can export an action to handle data
           mutations.
-        </p>
-        <Form method="post" className="remix__form">
-          <h3>Post an Action</h3>
-          <p>
-            <i>What is more useful when it is broken?</i>
-          </p>
-          <label>
-            <div>Answer:</div>
-            <input ref={answerRef} name="answer" type="text" />
-          </label>
-          <div>
-            <button>Answer!</button>
-          </div>
-          {actionMessage ? (
-            <p>
-              <b>{actionMessage}</b>
-            </p>
-          ) : null}
-        </Form>
-      </main>
+        </Typography>
+        <Card method="post" component={Form} variant="outlined">
+          <CardContent>
+            <Typography variant="h5" component="h3" gutterBottom>
+              Post an Action
+            </Typography>
+            <Typography paragraph>
+              <i>What is more useful when it is broken?</i>
+            </Typography>
+            <TextField
+              error={!!actionMessage}
+              helperText={actionMessage ?? "Answer the question!"}
+              label="Answer"
+              name="answer"
+              type="text"
+              inputRef={answerRef}
+            />
+          </CardContent>
+          <CardActions>
+            <Button type="submit">Answer!</Button>
+          </CardActions>
+        </Card>
+      </Box>
 
-      <aside>
-        <h3>Additional Resources</h3>
+      <Box component="aside" sx={{ p: 2 }}>
+        <Typography variant="h6" component="h3">
+          Additional Resources
+        </Typography>
         <ul>
           <li>
             Guide:{" "}
-            <a href="https://remix.run/guides/data-writes">Data Writes</a>
+            <Link href="https://remix.run/guides/data-writes">Data Writes</Link>
           </li>
           <li>
             API:{" "}
-            <a href="https://remix.run/api/conventions#action">
+            <Link href="https://remix.run/api/conventions#action">
               Route Action Export
-            </a>
+            </Link>
           </li>
           <li>
             API:{" "}
-            <a href="https://remix.run/api/remix#useactiondata">
+            <Link href="https://remix.run/api/remix#useactiondata">
               <code>useActionData</code>
-            </a>
+            </Link>
           </li>
         </ul>
-      </aside>
-    </div>
+      </Box>
+    </Box>
   );
 }

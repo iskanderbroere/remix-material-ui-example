@@ -1,3 +1,17 @@
+import { Alert } from "@mui/material";
+
 export default function NiceWork() {
-  return <h1>You got it right!</h1>;
+  return (
+    <Alert
+      variant="outlined"
+      severity="success"
+      sx={{
+        my: 2,
+        maxWidth: 360,
+        mx: "auto",
+      }}
+    >
+      You got it right!
+    </Alert>
+  );
 }

@@ -1,5 +1,7 @@
-import { useCatch, Link, json, useLoaderData } from "remix";
+import { Box, Chip, Typography } from "@mui/material";
+import { ReactNode } from "react";
 import type { LoaderFunction, MetaFunction } from "remix";
+import { json, useCatch, useLoaderData } from "remix";
 
 // The `$` in route filenames becomes a pattern that's parsed from the URL and
 // passed to your loaders so you can look up data.
@@ -40,9 +42,17 @@ export let loader: LoaderFunction = async ({ params }) => {
 export default function ParamDemo() {
   let data = useLoaderData();
   return (
-    <h1>
-      The param is <i style={{ color: "red" }}>{data.param}</i>
-    </h1>
+    <Typography component="h1" gutterBottom>
+      The param is{" "}
+      <Box
+        component="i"
+        sx={{
+          color: "error.main",
+        }}
+      >
+        {data.param}
+      </Box>
+    </Typography>
   );
 }
 
@@ -52,37 +62,49 @@ export default function ParamDemo() {
 export function CatchBoundary() {
   let caught = useCatch();
 
-  let message: React.ReactNode;
+  let message: ReactNode;
   switch (caught.status) {
     case 401:
       message = (
-        <p>
+        <Typography paragraph>
           Looks like you tried to visit a page that you do not have access to.
           Maybe ask the webmaster ({caught.data.webmasterEmail}) for access.
-        </p>
+        </Typography>
       );
     case 404:
       message = (
-        <p>Looks like you tried to visit a page that does not exist.</p>
+        <Typography paragraph>
+          Looks like you tried to visit a page that does not exist.
+        </Typography>
       );
     default:
       message = (
-        <p>
-          There was a problem with your request!
-          <br />
-          {caught.status} {caught.statusText}
-        </p>
+        <>
+          <Typography paragraph>
+            There was a problem with your request!
+          </Typography>
+          <Chip
+            sx={{
+              mb: 2,
+            }}
+            label={`${caught.status} ${caught.statusText}`}
+            color="error"
+            variant="outlined"
+          />
+        </>
       );
   }
 
   return (
     <>
-      <h2>Oops!</h2>
-      <p>{message}</p>
-      <p>
+      <Typography component="h2" variant="h5" gutterBottom>
+        Oops!
+      </Typography>
+      {message}
+      <Typography>
         (Isn't it cool that the user gets to stay in context and try a different
         link in the parts of the UI that didn't blow up?)
-      </p>
+      </Typography>
     </>
   );
 }
@@ -93,12 +115,14 @@ export function ErrorBoundary({ error }: { error: Error }) {
   console.error(error);
   return (
     <>
-      <h2>Error!</h2>
-      <p>{error.message}</p>
-      <p>
+      <Typography component="h2" variant="h5" gutterBottom>
+        Error!
+      </Typography>
+      <Typography gutterBottom>{error.message}</Typography>
+      <Typography>
         (Isn't it cool that the user gets to stay in context and try a different
         link in the parts of the UI that didn't blow up?)
-      </p>
+      </Typography>
     </>
   );
 }

@@ -1,6 +1,32 @@
-import * as React from "react";
+import createCache from "@emotion/cache";
+import { CacheProvider } from "@emotion/react";
 import {
+  AppBar,
+  Box,
+  Button,
+  Container,
+  CssBaseline,
+  Divider,
   Link,
+  styled,
+  ThemeProvider,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import {
+  ComponentPropsWithoutRef,
+  memo,
+  PropsWithChildren,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Link as RemixLink,
   Links,
   LiveReload,
   Meta,
@@ -8,33 +34,9 @@ import {
   Scripts,
   ScrollRestoration,
   useCatch,
-  useLocation
+  useLocation,
 } from "remix";
-import type { LinksFunction } from "remix";
-
-import deleteMeRemixStyles from "~/styles/demos/remix.css";
-import globalStylesUrl from "~/styles/global.css";
-import darkStylesUrl from "~/styles/dark.css";
-
-/**
- * The `links` export is a function that returns an array of objects that map to
- * the attributes for an HTML `<link>` element. These will load `<link>` tags on
- * every route in the app, but individual routes can include their own links
- * that are automatically unloaded when a user navigates away from the route.
- *
- * https://remix.run/api/app#links
- */
-export let links: LinksFunction = () => {
-  return [
-    { rel: "stylesheet", href: globalStylesUrl },
-    {
-      rel: "stylesheet",
-      href: darkStylesUrl,
-      media: "(prefers-color-scheme: dark)"
-    },
-    { rel: "stylesheet", href: deleteMeRemixStyles }
-  ];
-};
+import { createTheme } from "./theme";
 
 /**
  * The root module's default export is a component that renders the current
@@ -42,20 +44,33 @@ export let links: LinksFunction = () => {
  * component for your app.
  */
 export default function App() {
+  // Client-side cache, shared for the whole session of the user in the browser.
+  const cache = createCache({ key: "css" });
+  const prefersLightMode = useMediaQuery("(prefers-color-scheme: light)");
+
+  const theme = useMemo(
+    () => createTheme({ prefersLightMode }),
+    [prefersLightMode]
+  );
   return (
-    <Document>
-      <Layout>
-        <Outlet />
-      </Layout>
-    </Document>
+    <CacheProvider value={cache}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Document>
+          <Layout>
+            <Outlet />
+          </Layout>
+        </Document>
+      </ThemeProvider>
+    </CacheProvider>
   );
 }
 
 function Document({
   children,
-  title
+  title,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   title?: string;
 }) {
   return (
@@ -78,38 +93,106 @@ function Document({
   );
 }
 
-function Layout({ children }: React.PropsWithChildren<{}>) {
+const RemixApp = styled("div")(`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: calc(100vh - env(safe-area-inset-bottom));
+  & > * {
+    width: 100%;
+  } 
+`);
+
+function Layout({ children }: PropsWithChildren<{}>) {
+  const theme = useTheme();
   return (
-    <div className="remix-app">
-      <header className="remix-app__header">
-        <div className="container remix-app__header-content">
-          <Link to="/" title="Remix" className="remix-app__header-home-link">
-            <RemixLogo />
-          </Link>
-          <nav aria-label="Main navigation" className="remix-app__header-nav">
-            <ul>
-              <li>
-                <Link to="/">Home</Link>
-              </li>
-              <li>
-                <a href="https://remix.run/docs">Remix Docs</a>
-              </li>
-              <li>
-                <a href="https://github.com/remix-run/remix">GitHub</a>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </header>
-      <div className="remix-app__main">
-        <div className="container remix-app__main-content">{children}</div>
-      </div>
-      <footer className="remix-app__footer">
-        <div className="container remix-app__footer-content">
+    <RemixApp>
+      <AppBar
+        position="static"
+        color={theme.palette.mode === "dark" ? "primary" : "transparent"}
+        elevation={2}
+      >
+        <Toolbar>
+          <Container
+            maxWidth="lg"
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Link
+              component={RemixLink}
+              to="/"
+              title="Remix"
+              color="inherit"
+              sx={{
+                width: 106,
+                height: 30,
+              }}
+            >
+              <RemixLogo />
+            </Link>
+            <Box
+              component="nav"
+              aria-label="Main navigation"
+              className="remix-app__header-nav"
+            >
+              <Box
+                component="ul"
+                sx={{
+                  listStyle: "none",
+                  m: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3,
+                }}
+              >
+                <li>
+                  <Button component={RemixLink} to="/">
+                    Home
+                  </Button>
+                </li>
+                <li>
+                  <Button href="https://remix.run/docs">Remix Docs</Button>
+                </li>
+                <li>
+                  <Button href="https://github.com/remix-run/remix">
+                    GitHub
+                  </Button>
+                </li>
+              </Box>
+            </Box>
+          </Container>
+        </Toolbar>
+      </AppBar>
+      <Box
+        sx={{
+          flex: "1 1 100%",
+        }}
+      >
+        <Container maxWidth="lg">{children}</Container>
+      </Box>
+      <Box
+        component="footer"
+        sx={{
+          py: 2,
+          borderTop: "1px solid",
+          borderTopColor: "grey.400",
+        }}
+      >
+        <Container
+          maxWidth="lg"
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <p>&copy; You!</p>
-        </div>
-      </footer>
-    </div>
+        </Container>
+      </Box>
+    </RemixApp>
   );
 }
 
@@ -120,15 +203,17 @@ export function CatchBoundary() {
   switch (caught.status) {
     case 401:
       message = (
-        <p>
+        <Typography>
           Oops! Looks like you tried to visit a page that you do not have access
           to.
-        </p>
+        </Typography>
       );
       break;
     case 404:
       message = (
-        <p>Oops! Looks like you tried to visit a page that does not exist.</p>
+        <Typography>
+          Oops! Looks like you tried to visit a page that does not exist.
+        </Typography>
       );
       break;
 
@@ -139,9 +224,9 @@ export function CatchBoundary() {
   return (
     <Document title={`${caught.status} ${caught.statusText}`}>
       <Layout>
-        <h1>
+        <Typography component="h1">
           {caught.status}: {caught.statusText}
-        </h1>
+        </Typography>
         {message}
       </Layout>
     </Document>
@@ -154,20 +239,22 @@ export function ErrorBoundary({ error }: { error: Error }) {
     <Document title="Error!">
       <Layout>
         <div>
-          <h1>There was an error</h1>
-          <p>{error.message}</p>
-          <hr />
-          <p>
+          <Typography component="h1" gutterBottom>
+            There was an error
+          </Typography>
+          <Typography>{error.message}</Typography>
+          <Divider />
+          <Typography>
             Hey, developer, you should replace this with what you want your
             users to see.
-          </p>
+          </Typography>
         </div>
       </Layout>
     </Document>
   );
 }
 
-function RemixLogo(props: React.ComponentPropsWithoutRef<"svg">) {
+function RemixLogo(props: ComponentPropsWithoutRef<"svg">) {
   return (
     <svg
       viewBox="0 0 659 165"
@@ -194,17 +281,17 @@ function RemixLogo(props: React.ComponentPropsWithoutRef<"svg">) {
 /**
  * Provides an alert for screen reader users when the route changes.
  */
-const RouteChangeAnnouncement = React.memo(() => {
-  let [hydrated, setHydrated] = React.useState(false);
-  let [innerHtml, setInnerHtml] = React.useState("");
+const RouteChangeAnnouncement = memo(() => {
+  let [hydrated, setHydrated] = useState(false);
+  let [innerHtml, setInnerHtml] = useState("");
   let location = useLocation();
 
-  React.useEffect(() => {
+  useEffect(() => {
     setHydrated(true);
   }, []);
 
-  let firstRenderRef = React.useRef(true);
-  React.useEffect(() => {
+  let firstRenderRef = useRef(true);
+  useEffect(() => {
     // Skip the first render because we don't want an announcement on the
     // initial page load.
     if (firstRenderRef.current) {
@@ -238,7 +325,7 @@ const RouteChangeAnnouncement = React.memo(() => {
         position: "absolute",
         width: "1px",
         whiteSpace: "nowrap",
-        wordWrap: "normal"
+        wordWrap: "normal",
       }}
     >
       {innerHtml}
